@@ -322,8 +322,6 @@ void readVector(std::vector<int>& vector)
 	}
 }
 
-
-
 void main()
 {
 	Arbore arbore;
