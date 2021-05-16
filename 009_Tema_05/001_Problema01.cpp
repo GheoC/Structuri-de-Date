@@ -322,6 +322,8 @@ void readVector(std::vector<int>& vector)
 	}
 }
 
+
+//something for git testing
 void main()
 {
 	Arbore arbore;
