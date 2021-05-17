@@ -1,5 +1,5 @@
 /*
-Implementati un arbore binat de cautare cu chei numere intregi. Utilizati o structura  NOD,
+Implementati un arbore binar de cautare cu chei numere intregi. Utilizati o structura  NOD,
 care are un camp de tip int, ce stocheaza cheia nodului si trei campuri de tip pointer la NOD
 pentru fiul stang, fiul drept si parintele nodului.De asemenea structura NOD dispune de un constructor
 care seteaza  campul int la o valoare transmisa  prin parametru si campurile de tip pointer la NOD le
@@ -124,36 +124,6 @@ struct Arbore
 	}
 
 
-	//returneaza minimul din subarborele nodului introdus ca parametru
-	Nod* getMinim(Nod* node)
-	{
-		Nod* iterator = node;
-		while (iterator != nullptr)
-		{
-			if (iterator->left == nullptr)
-			{
-				return iterator;
-			}
-			iterator = iterator->left;
-		}
-		return nullptr;
-	}
-
-
-	//returneaza maximul din subarborele nodului introdus ca parametru
-	Nod* getMaxim(Nod* node)
-	{
-		Nod* iterator = node;
-		while (iterator != nullptr)
-		{
-			if (iterator->right == nullptr)
-			{
-				return iterator;
-			}
-			iterator = iterator->right;
-		}
-		return nullptr;
-	}
 
 
 	//returneaza succesorul unui nod
@@ -162,7 +132,7 @@ struct Arbore
 		Nod* result;
 		if (node->right != nullptr)
 		{
-			result = getMinim(node->right);
+			result = getMinimImplementation(node->right);
 		}
 		else
 		{
@@ -181,7 +151,7 @@ struct Arbore
 		Nod* result;
 		if (node->left != nullptr)
 		{
-			result = getMaxim(node->left);
+			result = getMaximImplementation(node->left);
 		}
 		else
 		{
@@ -211,13 +181,109 @@ struct Arbore
 		clearImplementation(root);
 	}
 
-	void deleteNod(int cheie) 
-	{
 
+	//adaptare a codului din curs
+	void deleteNod(int cheie)
+	{
+		Nod* sters = search(cheie);
+
+		if (sters->left == nullptr)
+		{
+			transplant(sters, sters->right);
+		}
+		else
+		{
+			if (sters->right == nullptr)
+			{
+				transplant(sters, sters->left);
+			}
+			else
+			{
+				Nod* succesor = getSuccesor(sters);
+
+				if (succesor != sters->right)
+				{
+					transplant(succesor, succesor->right);
+					succesor->right = sters->right;
+					sters->right->parent = succesor;
+				}
+				transplant(sters, succesor);
+				succesor->left = sters->left;
+				sters->left->parent = succesor;
+			}
+		}
+	}
+
+	Nod* getMinim()
+	{
+		return getMinimImplementation(root);
+	}
+
+	Nod* getMaxim()
+	{
+		return getMaximImplementation(root);
 	}
 
 
 private:
+
+	//returneaza minimul din subarborele nodului introdus ca parametru
+	Nod* getMinimImplementation(Nod* node)
+	{
+		Nod* iterator = node;
+		while (iterator != nullptr)
+		{
+			if (iterator->left == nullptr)
+			{
+				return iterator;
+			}
+			iterator = iterator->left;
+		}
+		return nullptr;
+	}
+
+
+	//returneaza maximul din subarborele nodului introdus ca parametru
+	Nod* getMaximImplementation(Nod* node)
+	{
+		Nod* iterator = node;
+		while (iterator != nullptr)
+		{
+			if (iterator->right == nullptr)
+			{
+				return iterator;
+			}
+			iterator = iterator->right;
+		}
+		return nullptr;
+	}
+
+
+	//din curs
+	void transplant(Nod* sters, Nod* succesor)
+	{
+		if (sters->parent == nullptr)
+		{
+			root = succesor;
+		}
+		else
+		{
+			if (sters == sters->parent->left)
+			{
+				sters->parent->left = succesor;
+			}
+			else
+			{
+				sters->parent->right = succesor;
+			}
+		}
+
+		if (succesor != nullptr)
+		{
+			succesor->parent = sters->parent;
+		}
+	}
+
 	void insertImplementation(int cheie, Nod* nodCurent)
 	{
 		if (cheie < nodCurent->cheie)
@@ -327,41 +393,220 @@ void readVector(std::vector<int>& vector)
 void main()
 {
 	Arbore arbore;
-
 	std::vector<int> vector;
 	readVector(vector);
 
-	arbore.insert(vector);
-	arbore.printTree();
 
-	arbore.printInOrder();
-	arbore.printPostOrder();
-	arbore.printPreOrder();
+	int choice;
+	std::cout << "Doresti sa lucrezi pe un arbore gol sau predefinit din fisier?\n";
+	std::cout << " - arbore gol:         press 1\n";
+	std::cout << " - arbore predefinit:  press 2\n";
+	do
+	{
+		std::cin >> choice;
+		if (choice == 2)
+		{
+			arbore.insert(vector);
+			std::cout << "\nArborele este incarcat: \n";
+			arbore.printTree();
+		}
 
-	std::cout << "\n" << arbore.root->cheie << "\n";
+		if (choice == 1)
+		{
+			std::cout << "\nAi ales varianta cu arbore gol!";
+		}
 
-	arbore.search(89) == nullptr ? std::cout << "Not found\n" : std::cout << "Found\n";
-	arbore.search(189) == nullptr ? std::cout << "Not found\n" : std::cout << "Found\n";
+		if (choice != 1 && choice != 2)
+		{
+			std::cout << "Wrong choice! Try again: \n";
+		}
 
-	arbore.getMinim(arbore.search(189)) == nullptr ? std::cout << "Not found" : std::cout << arbore.getMinim(arbore.search(189))->cheie;
-	arbore.getMinim(arbore.search(63)) == nullptr ? std::cout << "Not found" : std::cout << arbore.getMaxim(arbore.search(63))->cheie;
-
-
-	Nod* testSuccesor = arbore.getSuccesor(arbore.search(92));
-	testSuccesor == nullptr ? std::cout << "\nNu exista" : std::cout << "\n" << testSuccesor->cheie;
-
-	Nod* testPredecesor = arbore.getPredecesor(arbore.search(75));
-	testPredecesor == nullptr ? std::cout << "\nNu exista" : std::cout << "\n" << testPredecesor->cheie;
+	} while (choice != 1 && choice != 2);
 
 
-	Arbore arbore2;
+	int menuChoice, element;
 
-	std::cout << "Clearing: \n";
-	std::cout << "\n" << arbore.empty();
-	std::cout << arbore.root->cheie;
-	arbore.clear();
+	do
+	{
+		std::cout << "\n\n\n\n\n\n\=========================================";
+		std::cout << "\nMENU";
+		std::cout << "\n1. Adauga un nod in arbore";
+		std::cout << "\n2. Cauta un element in arbore";
+		std::cout << "\n3. Sterge un element din arbore";
+		std::cout << "\n4. Afiseaza minimul din arbore";
+		std::cout << "\n5. Afiseaza maximul din arbore: ";
+		std::cout << "\n6. Afiseaza succesorul unui nod din arbore: ";
+		std::cout << "\n7. Afiseaza predecesorul unui nod din arbore: ";
+		std::cout << "\n8. Afiseaza arborele: ";
+		std::cout << "\n\n9. Exit";
+		std::cout << "\n=========================================";
+		std::cout << "\n    Introdu optiunea: ";
+		std::cin >> menuChoice;
 
-	std::cout << "\n" << arbore.empty();
+		switch (menuChoice)
+		{
+		case 1:
+		{
+			system("CLS");
+			int element;
+			std::cout << "Introdu elementul de introdus in arbore: ";
+			std::cin >> element;
+			arbore.insert(element);
 
-	std::cout << arbore.root->cheie;
+			break;
+		}
+		case 2:
+		{
+			system("CLS");
+			int element;
+			std::cout << "Introdu elementul pe care-l cauti in arbore: ";
+			std::cin >> element;
+			arbore.search(element) == nullptr ? std::cout << element << " not found\n" : std::cout << element << " found\n";
+			break;
+		}
+		case 3:
+		{
+			system("CLS");
+			int element;
+			std::cout << "Introdu elementul pe care doresti sa-l stergi din arbore: ";
+			std::cin >> element;
+
+			if (arbore.search(element) != nullptr)
+			{
+				arbore.deleteNod(element);
+				std::cout << element << " sters cu succes!";
+			}
+			else
+			{
+				std::cout << element << " not found in arbore";
+			}
+
+			break;
+		}
+		case 4:
+		{
+			system("CLS");
+			std::cout << "Minimul din arbore este: ";
+			arbore.getMinim() == nullptr ? std::cout << "Arbore empty" : std::cout << arbore.getMinim()->cheie;
+
+			break;
+		}
+		case 5:
+		{
+			system("CLS");
+			std::cout << "Maximul din arbore este: ";
+			arbore.getMaxim() == nullptr ? std::cout << "Arbore empty" : std::cout << arbore.getMaxim()->cheie;
+			break;
+		}
+		case 6:
+		{
+			system("CLS");
+			std::cout << "Introdu elementul pentru care doresti sa afli succesorul: ";
+			std::cin >> element;
+
+			if (!arbore.empty())
+			{
+				Nod* succesor = arbore.getSuccesor(arbore.search(element));
+				succesor == nullptr ? std::cout << "\nNu exista succesor pentru " << element : std::cout << "\n" << "Succesorul pentru " << element << " este " << succesor->cheie;
+			}
+			else
+			{
+				std::cout << "Arbore is empty!";
+			}
+			
+
+			break;
+		}
+
+		case 7:
+		{
+			system("CLS");
+			std::cout << "Introdu elementul pentru care doresti sa afli predecesorul: ";
+			std::cin >> element;
+
+			if (!arbore.empty())
+			{
+				Nod* predecesor = arbore.getPredecesor(arbore.search(element));
+				predecesor == nullptr ? std::cout << "\nNu exista predecesor pentru " << element : std::cout << "\n" << "Predecesorul pentru " << element << " este " << predecesor->cheie;
+			}
+			else
+			{
+				std::cout << "Arbore is empty!";
+			}
+
+			break;
+		}
+
+		case 8:
+		{
+			system("CLS");
+			int displayChoice;
+			do
+			{
+				std::cout << "\n\n\n\n\n\n\=========================================";
+				std::cout << "\n***** Modul afisare ******\n";
+				std::cout << "1. Afisare inOrdine (S.R.D.)\n";
+				std::cout << "2. Afisare preOrdine (R.S.D.)\n";
+				std::cout << "3. Afisare postOrdine (S.D.R.)\n";
+				std::cout << "4. Afisare 2-D\n";
+				std::cout << "\n5. Inapoi la meniul principal\n";
+
+				std::cout << "Introdu optiunea: ";
+
+				std::cin >> displayChoice;
+
+				switch (displayChoice)
+				{
+				case 1:
+				{
+					system("CLS");
+					arbore.printInOrder();
+					break;
+				}
+				case 2:
+				{
+					system("CLS");
+					arbore.printPreOrder();
+					break;
+				}
+				case 3:
+				{
+					system("CLS");
+					arbore.printPostOrder();
+					break;
+				}
+				case 4:
+				{
+					system("CLS");
+					arbore.printTree();
+					break;
+				}
+
+				default: 
+				{
+					system("CLS");
+					std::cout << "\nOptiune invalida! Alege din nou: ";
+					break;
+				}
+					
+				}
+
+			} while (displayChoice != 5);
+
+			break;
+		}
+
+		case 9:
+		{
+			system("CLS");
+			std::cout << "\nPe curand!\n\n";
+			break;
+		}
+		default:
+		{
+			system("CLS");
+			std::cout << "\nOptiune invalida! Alege din nou: ";
+		}
+		}
+	} while (menuChoice != 9);
 }
