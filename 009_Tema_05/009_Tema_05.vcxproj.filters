@@ -18,9 +18,15 @@
     <ClCompile Include="001_Problema01.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="003_Problema03.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="inputEx01.txt">
+      <Filter>Source Files</Filter>
+    </Text>
+    <Text Include="inputEx02.txt">
       <Filter>Source Files</Filter>
     </Text>
   </ItemGroup>
