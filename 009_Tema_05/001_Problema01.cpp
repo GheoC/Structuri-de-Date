@@ -109,13 +109,13 @@
 //			{
 //				return iterator;
 //			}
-//
+//          Nod* iterator2 = iterator;
 //			if (cheie < iterator->cheie)
 //			{
 //				iterator = iterator->left;
 //			}
 //
-//			if (cheie > iterator->cheie)
+//			if (cheie > iterator2->cheie)
 //			{
 //				iterator = iterator->right;
 //			}
